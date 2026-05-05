@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACCT 201 Final Exam Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 720px;
+      padding: 36px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* Header */
+    .quiz-header { margin-bottom: 28px; }
+    .quiz-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .progress-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: #334155;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+    .progress-label {
+      font-size: 12px;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    /* Category tag */
+    .category-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 3px 10px;
+      color: #94a3b8;
+      margin-bottom: 14px;
+    }
+
+    /* Question */
+    .question-text {
+      font-size: 17px;
+      font-weight: 500;
+      line-height: 1.6;
+      color: #f1f5f9;
+      margin-bottom: 28px;
+    }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 10px;
+      padding: 14px 18px;
+      cursor: pointer;
+      text-align: left;
+      color: #cbd5e1;
+      font-size: 15px;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: #3b82f6;
+      background: #1e3a5f;
+      color: #f1f5f9;
+    }
+    .option-btn .letter {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 1.5px solid #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .option-btn.correct {
+      border-color: #22c55e;
+      background: #052e16;
+      color: #bbf7d0;
+    }
+    .option-btn.correct .letter {
+      background: #16a34a;
+      border-color: #16a34a;
+      color: #fff;
+    }
+    .option-btn.wrong {
+      border-color: #ef4444;
+      background: #2c0a0a;
+      color: #fecaca;
+    }
+    .option-btn.wrong .letter {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: #fff;
+    }
+    .option-btn:disabled { cursor: default; }
+
+    /* Hint */
+    .hint-toggle {
+      background: none;
+      border: 1.5px dashed #475569;
+      border-radius: 8px;
+      color: #64748b;
+      font-size: 13px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      width: fit-content;
+    }
+    .hint-toggle:hover { border-color: #f59e0b; color: #f59e0b; }
+
+    .hint-box {
+      display: none;
+      background: #1c1a00;
+      border: 1px solid #713f12;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #fde68a;
+      line-height: 1.6;
+    }
+    .hint-box.visible { display: block; }
+
+    /* Explanation */
+    .explanation-box {
+      display: none;
+      background: #0a1628;
+      border: 1px solid #1d4ed8;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      font-size: 14px;
+      color: #93c5fd;
+      line-height: 1.6;
+    }
+    .explanation-box.visible { display: block; }
+
+    /* Footer row */
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .score-display {
+      font-size: 13px;
+      color: #64748b;
+    }
+    .score-display span { color: #38bdf8; font-weight: 700; }
+
+    .next-btn {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 12px 28px;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s, transform .15s;
+    }
+    .next-btn.visible { opacity: 1; pointer-events: all; }
+    .next-btn:hover { transform: translateY(-1px); }
+
+    /* Results screen */
+    .results-screen { text-align: center; }
+    .results-score-big {
+      font-size: 72px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .results-label { font-size: 16px; color: #94a3b8; margin-bottom: 28px; }
+    .results-breakdown {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .results-stat {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 16px 24px;
+      min-width: 110px;
+    }
+    .results-stat .stat-num { font-size: 28px; font-weight: 700; color: #f1f5f9; }
+    .results-stat .stat-label { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .restart-btn {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 36px;
+      cursor: pointer;
+      transition: transform .15s;
+    }
+    .restart-btn:hover { transform: translateY(-2px); }
+
+    /* Start screen */
+    .start-screen { text-align: center; }
+    .start-screen h1 { font-size: 26px; font-weight: 700; color: #f1f5f9; margin-bottom: 10px; }
+    .start-screen p { color: #94a3b8; margin-bottom: 28px; font-size: 15px; line-height: 1.6; }
+    .topic-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .topic-pill {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .start-btn {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 40px;
+      cursor: pointer;
+      transition: transform .15s;
+    }
+    .start-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="card" id="app"></div>
+
+<script>
+const QUESTIONS = [
+  // ── DEPRECIATION ──────────────────────────────────────────────
+  {
+    category: "Depreciation (Ch. 7)",
+    question: "A machine costs $65,000, has a $5,000 residual value, and a 10-year useful life. Using straight-line depreciation, what is the annual depreciation expense?",
+    options: ["$5,000", "$6,000", "$6,500", "$7,000"],
+    correct: 1,
+    hint: "Straight-line formula: (Cost − Residual Value) ÷ Useful Life",
+    explanation: "(65,000 − 5,000) ÷ 10 = $6,000 per year"
+  },
+  {
+    category: "Depreciation (Ch. 7)",
+    question: "The same machine ($65,000 cost, $5,000 residual, 10-year life) is purchased on June 1, 2023. The company has a December 31 year-end. How much depreciation should be recorded for 2023?",
+    options: ["$2,500", "$3,000", "$3,500", "$6,000"],
+    correct: 2,
+    hint: "First find the full-year amount, then multiply by the fraction of the year owned (count months from June 1 to Dec 31).",
+    explanation: "Full-year = $6,000. June 1 – Dec 31 = 7 months. $6,000 × 7/12 = $3,500"
+  },
+  {
+    category: "Depreciation (Ch. 7)",
+    question: "Using the same machine (purchased June 1, 2023), what is the book value on December 31, 2024?",
+    options: ["$55,500", "$56,000", "$59,000", "$62,000"],
+    correct: 0,
+    hint: "Book Value = Cost − Accumulated Depreciation. Add up depreciation from 2023 and 2024.",
+    explanation: "Accum. Dep. = $3,500 (2023) + $6,000 (2024) = $9,500. Book Value = $65,000 − $9,500 = $55,500"
+  },
+  {
+    category: "Depreciation (Ch. 7)",
+    question: "A truck costs $48,000, has a $3,000 residual value, and a 5-year useful life (straight-line). What is accumulated depreciation after 3 full years?",
+    options: ["$9,000", "$27,000", "$29,000", "$45,000"],
+    correct: 1,
+    hint: "Find annual depreciation first, then multiply by 3 years.",
+    explanation: "Annual = (48,000 − 3,000) ÷ 5 = $9,000. After 3 years: $9,000 × 3 = $27,000"
+  },
+
+  // ── INVENTORY ─────────────────────────────────────────────────
+  {
+    category: "Inventory — FIFO (Ch. 6)",
+    question: "Sunset Gear has 30 units @ $500 and purchases 25 more @ $520. It then sells 40 units. What is COGS under FIFO?",
+    options: ["$19,500", "$20,200", "$20,500", "$21,040"],
+    correct: 1,
+    hint: "FIFO: sell the oldest units first. Use all 30 @ $500 first, then take the rest from the $520 batch.",
+    explanation: "(30 × $500) + (10 × $520) = $15,000 + $5,200 = $20,200"
+  },
+  {
+    category: "Inventory — LIFO (Ch. 6)",
+    question: "Same scenario (30 @ $500, 25 @ $520, sell 40). What is COGS under LIFO?",
+    options: ["$20,000", "$20,200", "$20,500", "$21,000"],
+    correct: 2,
+    hint: "LIFO: sell the newest units first. Use all 25 @ $520 first, then take the rest from the $500 batch.",
+    explanation: "(25 × $520) + (15 × $500) = $13,000 + $7,500 = $20,500"
+  },
+  {
+    category: "Inventory — Weighted Avg (Ch. 6)",
+    question: "Same scenario (30 @ $500, 25 @ $520). What is the weighted average cost per unit?",
+    options: ["$508.00", "$509.09", "$510.00", "$511.82"],
+    correct: 1,
+    hint: "Weighted Avg = Total Cost of All Available Units ÷ Total Units Available",
+    explanation: "Total cost = (30×$500)+(25×$520) = $28,000. Units = 55. $28,000 ÷ 55 = $509.09/unit"
+  },
+  {
+    category: "Inventory — Ending Inventory (Ch. 6)",
+    question: "After selling 40 units from the same inventory, 15 units remain. What is ending inventory under FIFO?",
+    options: ["$7,500", "$7,636", "$7,800", "$8,000"],
+    correct: 2,
+    hint: "FIFO: remaining units are from the most recent purchase batch.",
+    explanation: "15 remaining units are all from the $520 batch. 15 × $520 = $7,800"
+  },
+  {
+    category: "Inventory — Ending Inventory (Ch. 6)",
+    question: "Same 15 remaining units. What is ending inventory under LIFO?",
+    options: ["$7,500", "$7,636", "$7,800", "$8,000"],
+    correct: 0,
+    hint: "LIFO: remaining units are from the oldest purchase batch.",
+    explanation: "15 remaining units are all from the $500 batch (oldest). 15 × $500 = $7,500"
+  },
+  {
+    category: "Inventory — Gross Profit (Ch. 6)",
+    question: "Sunset Gear sells 40 units for a total of $30,000. Using FIFO (COGS = $20,200), what is gross profit?",
+    options: ["$7,800", "$9,800", "$10,000", "$11,200"],
+    correct: 1,
+    hint: "Gross Profit = Revenue − COGS",
+    explanation: "$30,000 − $20,200 = $9,800"
+  },
+  {
+    category: "Inventory — Periodic (Ch. 6)",
+    question: "Sampson Inc. has: 50 units @ $5.10, purchases 60 @ $5.20 and 40 @ $5.30, then sells 100 units. Using FIFO (periodic), what is COGS?",
+    options: ["$510", "$515", "$520", "$524"],
+    correct: 1,
+    hint: "FIFO periodic: use oldest costs first. You're selling 100 units total.",
+    explanation: "(50 × $5.10) + (50 × $5.20) = $255 + $260 = $515"
+  },
+  {
+    category: "Inventory — Periodic (Ch. 6)",
+    question: "Using Sampson's data and LIFO (periodic), what is gross profit? (Selling price = $9.40/unit, 100 units sold)",
+    options: ["$400", "$416", "$420", "$430"],
+    correct: 1,
+    hint: "LIFO periodic: use newest costs first. Gross Profit = Revenue − COGS.",
+    explanation: "LIFO COGS = (40×$5.30)+(60×$5.20) = $212+$312 = $524. Revenue = 100×$9.40 = $940. GP = $940−$524 = $416"
+  },
+  {
+    category: "Inventory — Periodic (Ch. 6)",
+    question: "Sampson's weighted average cost per unit (periodic): beginning 50 @ $5.10, purchases 60 @ $5.20 and 40 @ $5.30. What is ending inventory for the 50 remaining units?",
+    options: ["$255", "$260", "$265", "$270"],
+    correct: 1,
+    hint: "Total cost ÷ Total units = weighted average per unit. Then multiply by remaining units.",
+    explanation: "Total cost = $779. Units = 150. Avg = $5.1933/unit. 50 × $5.1933 ≈ $260"
+  },
+
+  // ── REVENUE & DEFERRED REVENUE ────────────────────────────────
+  {
+    category: "Revenue Recognition (Ch. 5)",
+    question: "On October 1, 2024, a customer pays Netflix $240 for an annual subscription. How much revenue should Netflix recognize in 2024 (fiscal year ends Dec 31)?",
+    options: ["$20", "$40", "$60", "$240"],
+    correct: 2,
+    hint: "Revenue is recognized as the service is provided. Find the monthly amount, then count the months in 2024.",
+    explanation: "$240 ÷ 12 = $20/month. Oct–Dec = 3 months. $20 × 3 = $60"
+  },
+  {
+    category: "Revenue Recognition (Ch. 5)",
+    question: "For the same Netflix subscription (paid Oct 1, 2024), what is the Deferred Revenue balance on the December 31, 2024 balance sheet?",
+    options: ["$60", "$120", "$180", "$240"],
+    correct: 2,
+    hint: "Deferred Revenue = cash received for services NOT YET provided. Count how many months of service remain after Dec 31.",
+    explanation: "9 months remain (Jan–Sep 2025). $20 × 9 = $180"
+  },
+  {
+    category: "Revenue Recognition (Ch. 5)",
+    question: "Serenity Spa receives a $50 deposit on Oct 20 for a $200 spa package. Services are provided Oct 28. What is the Sales Revenue recorded on October 28?",
+    options: ["$50", "$150", "$200", "$250"],
+    correct: 2,
+    hint: "Revenue is recognized when services are provided — the full amount earned that day.",
+    explanation: "The full $200 service is provided on Oct 28, so $200 of Sales Revenue is recognized regardless of when payment was received."
+  },
+  {
+    category: "Revenue Recognition (Ch. 5)",
+    question: "On October 28, Serenity Spa provides the $200 spa package (already received $50 deposit). What is the Accounts Receivable recorded on that date?",
+    options: ["$0", "$50", "$150", "$200"],
+    correct: 2,
+    hint: "AR = the portion still owed by the customer (total price minus deposit already received).",
+    explanation: "$200 total − $50 already received = $150 still owed → Accounts Receivable of $150"
+  },
+
+  // ── NOTES PAYABLE ─────────────────────────────────────────────
+  {
+    category: "Notes Payable (Ch. 9)",
+    question: "BrightPath borrows $150,000 on September 1, 2024 at 6% annual interest (1-year note). How much interest expense is recognized in 2024?",
+    options: ["$2,250", "$3,000", "$4,500", "$9,000"],
+    correct: 1,
+    hint: "Interest = Principal × Rate × Time. Count the months from Sep 1 to Dec 31.",
+    explanation: "$150,000 × 6% × 4/12 = $3,000 (4 months: Sep, Oct, Nov, Dec)"
+  },
+  {
+    category: "Notes Payable (Ch. 9)",
+    question: "For the same BrightPath note, how much interest expense is recognized in 2025 (note matures September 1, 2025)?",
+    options: ["$3,000", "$4,500", "$6,000", "$9,000"],
+    correct: 2,
+    hint: "Count months from January 1 to September 1 (the maturity date).",
+    explanation: "$150,000 × 6% × 8/12 = $6,000 (8 months: Jan–Aug)"
+  },
+  {
+    category: "Notes Payable (Ch. 9)",
+    question: "What is the total cash paid by BrightPath on September 1, 2025 (the maturity date)?",
+    options: ["$153,000", "$156,000", "$159,000", "$162,000"],
+    correct: 2,
+    hint: "At maturity, the company repays the full principal PLUS the full year's interest.",
+    explanation: "Principal + Full Year Interest = $150,000 + ($150,000 × 6%) = $150,000 + $9,000 = $159,000"
+  },
+  {
+    category: "Notes Payable (Ch. 9)",
+    question: "What two liability accounts appear on BrightPath's December 31, 2024 balance sheet related to the note, and what are their balances?",
+    options: [
+      "Notes Payable $150,000 and Interest Expense $3,000",
+      "Notes Payable $150,000 and Interest Payable $3,000",
+      "Notes Payable $153,000 only",
+      "Interest Payable $9,000 only"
+    ],
+    correct: 1,
+    hint: "The principal owed = Notes Payable. Accrued but unpaid interest = Interest Payable (a liability, not an expense).",
+    explanation: "Notes Payable = $150,000 (face amount). Interest Payable = $3,000 (4 months of accrued interest). Both are liabilities on the balance sheet."
+  },
+
+  // ── SALARIES & PREPAID ────────────────────────────────────────
+  {
+    category: "Salaries & Accruals (Ch. 4)",
+    question: "BrightHome pays $18,000 on Jan 9, 2025. Of this, $5,500 is for December 2024 work and $12,500 for January 2025 work. What is Salaries Payable on Dec 31, 2024?",
+    options: ["$0", "$5,500", "$12,500", "$18,000"],
+    correct: 1,
+    hint: "Salaries Payable = wages earned by employees but not yet paid. Only count what was earned in December.",
+    explanation: "$5,500 was earned in December 2024 but paid in January 2025 → accrued as Salaries Payable on Dec 31."
+  },
+  {
+    category: "Prepaid Expenses (Ch. 4)",
+    question: "Evergreen Landscaping pays $12,000 on March 1, 2024 for a one-year insurance policy. How much Insurance Expense is recognized in 2024?",
+    options: ["$8,000", "$10,000", "$11,000", "$12,000"],
+    correct: 1,
+    hint: "Expense = monthly cost × months the policy was in effect during 2024 (March 1 through December 31).",
+    explanation: "10 months used in 2024 (Mar–Dec). $12,000 ÷ 12 × 10 = $10,000"
+  },
+  {
+    category: "Prepaid Expenses (Ch. 4)",
+    question: "For the same Evergreen policy, what is the Prepaid Insurance balance on December 31, 2024?",
+    options: ["$0", "$1,000", "$2,000", "$12,000"],
+    correct: 2,
+    hint: "Prepaid balance = unused portion of the policy. How many months remain after December 31?",
+    explanation: "2 months remain (Jan–Feb 2025). $12,000 ÷ 12 × 2 = $2,000"
+  },
+
+  // ── EQUITY ────────────────────────────────────────────────────
+  {
+    category: "Equity Transactions (Ch. 10)",
+    question: "Stellar Tech issues 10,000 shares of preferred stock: $50 par value, sold at $55 each. What is Additional Paid-In Capital from this issuance?",
+    options: ["$0", "$50,000", "$500,000", "$550,000"],
+    correct: 1,
+    hint: "APIC = (Issue Price − Par Value) × Number of Shares",
+    explanation: "($55 − $50) × 10,000 = $5 × 10,000 = $50,000"
+  },
+  {
+    category: "Equity Transactions (Ch. 10)",
+    question: "Stellar Tech repurchases 1,500 of its preferred shares at $60 each. What amount is recorded in the Treasury Stock account?",
+    options: ["$75,000", "$90,000", "$100,000", "$105,000"],
+    correct: 1,
+    hint: "Treasury Stock = Number of Shares Repurchased × Repurchase Price",
+    explanation: "1,500 × $60 = $90,000. Treasury Stock is a contra-equity account (debit balance)."
+  },
+  {
+    category: "Equity Transactions (Ch. 10)",
+    question: "Stellar declares a $1/share cash dividend on preferred stock. Originally issued 10,000 shares, then repurchased 1,500 as treasury stock. What is the total dividend declared?",
+    options: ["$8,000", "$8,500", "$10,000", "$11,500"],
+    correct: 1,
+    hint: "Dividends are NOT paid on treasury shares. Outstanding shares = Issued − Treasury.",
+    explanation: "Outstanding = 10,000 − 1,500 = 8,500. Dividend = 8,500 × $1 = $8,500"
+  },
+  {
+    category: "Equity Transactions (Ch. 10)",
+    question: "Stellar begins with Retained Earnings of $400,000, earns Net Income of $850,000, and declares dividends of $8,500. What is ending Retained Earnings?",
+    options: ["$1,150,000", "$1,200,000", "$1,241,500", "$1,258,500"],
+    correct: 2,
+    hint: "Ending RE = Beginning RE + Net Income − Dividends",
+    explanation: "$400,000 + $850,000 − $8,500 = $1,241,500"
+  },
+
+  // ── ALLOWANCE FOR UNCOLLECTIBLE ACCOUNTS ──────────────────────
+  {
+    category: "Uncollectible Accounts (Ch. 5)",
+    question: "OceanVibe begins 2026 with AR of $72,000 and Allowance for Uncollectible Accounts (AUA) of $4,000. During 2026: credit sales $800,000, cash collected $750,000, write-offs $18,000. What is gross AR before the year-end adjusting entry?",
+    options: ["$86,000", "$104,000", "$122,000", "$854,000"],
+    correct: 1,
+    hint: "AR ending = Beginning AR + Credit Sales − Cash Collected − Write-offs",
+    explanation: "$72,000 + $800,000 − $750,000 − $18,000 = $104,000"
+  },
+  {
+    category: "Uncollectible Accounts (Ch. 5)",
+    question: "Using OceanVibe's data, uncollectible accounts are estimated at 6% of gross AR ($104,000). The AUA has a debit balance of $14,000 before the adjusting entry. What is Bad Debt Expense for 2026?",
+    options: ["$6,240", "$14,000", "$20,240", "$24,000"],
+    correct: 2,
+    hint: "Target AUA balance = 6% × gross AR. Bad Debt Expense = Target − Current balance (remember: a debit balance means you need MORE credit to get to target).",
+    explanation: "Target AUA = 6% × $104,000 = $6,240. Current AUA = −$14,000 (debit). Bad Debt Expense = $6,240 − (−$14,000) = $20,240"
+  },
+  {
+    category: "Uncollectible Accounts (Ch. 5)",
+    question: "After OceanVibe's year-end adjusting entry, what is Net Accounts Receivable (Gross AR − AUA)?",
+    options: ["$83,760", "$97,760", "$98,000", "$104,000"],
+    correct: 1,
+    hint: "Net AR = Gross AR − Allowance for Uncollectible Accounts (after adjustment)",
+    explanation: "Gross AR = $104,000. AUA after adjustment = $6,240. Net AR = $104,000 − $6,240 = $97,760"
+  }
+];
+
+// ─── State ────────────────────────────────────────────────────────────
+let current = 0;
+let score = 0;
+let answered = false;
+let hintOpen = false;
+let started = false;
+let results = [];
+
+// ─── Render ───────────────────────────────────────────────────────────
+const app = document.getElementById('app');
+
+function render() {
+  if (!started) { renderStart(); return; }
+  if (current >= QUESTIONS.length) { renderResults(); return; }
+  renderQuestion();
+}
+
+function renderStart() {
+  app.innerHTML = `
+    <div class="start-screen">
+      <div class="quiz-title">ACCT 201 · University of Nebraska–Lincoln</div>
+      <h1>Final Exam Practice Quiz</h1>
+      <p>Test your knowledge across all major topics.<br/>${QUESTIONS.length} multiple-choice questions with hints and explanations.</p>
+      <div class="topic-list">
+        <span class="topic-pill">Depreciation</span>
+        <span class="topic-pill">FIFO / LIFO / Wtd Avg</span>
+        <span class="topic-pill">Revenue Recognition</span>
+        <span class="topic-pill">Deferred Revenue</span>
+        <span class="topic-pill">Notes Payable</span>
+        <span class="topic-pill">Prepaid Expenses</span>
+        <span class="topic-pill">Salaries Accruals</span>
+        <span class="topic-pill">Equity Transactions</span>
+        <span class="topic-pill">Uncollectible Accounts</span>
+      </div>
+      <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+    </div>
+  `;
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const letters = ['A', 'B', 'C', 'D'];
+  const pct = Math.round((current / QUESTIONS.length) * 100);
+
+  const optionsHtml = q.options.map((opt, i) => {
+    let cls = 'option-btn';
+    if (answered) {
+      if (i === q.correct) cls += ' correct';
+      else if (i === results[current] && i !== q.correct) cls += ' wrong';
+    }
+    return `<button class="${cls}" onclick="selectAnswer(${i})" ${answered ? 'disabled' : ''}>
+      <span class="letter">${letters[i]}</span>
+      <span>${opt}</span>
+    </button>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="quiz-header">
+      <div class="quiz-title">ACCT 201 Final Exam Quiz</div>
+      <div class="progress-row">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <div class="progress-label">${current + 1} / ${QUESTIONS.length}</div>
+      </div>
+    </div>
+
+    <div class="category-tag">${q.category}</div>
+    <div class="question-text">${q.question}</div>
+    <div class="options">${optionsHtml}</div>
+
+    <button class="hint-toggle" onclick="toggleHint()">💡 ${hintOpen ? 'Hide Hint' : 'Show Hint'}</button>
+    <div class="hint-box ${hintOpen ? 'visible' : ''}" id="hint-box">${q.hint}</div>
+
+    <div class="explanation-box ${answered ? 'visible' : ''}" id="explanation-box">
+      <strong>Solution:</strong> ${q.explanation}
+    </div>
+
+    <div class="footer-row">
+      <div class="score-display">Score: <span>${score}</span> / ${current + (answered ? 1 : 0)}</div>
+      <button class="next-btn ${answered ? 'visible' : ''}" onclick="nextQuestion()">
+        ${current + 1 < QUESTIONS.length ? 'Next Question →' : 'See Results →'}
+      </button>
+    </div>
+  `;
+}
+
+function renderResults() {
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+  const wrong = QUESTIONS.length - score;
+  let grade = pct >= 90 ? 'Excellent!' : pct >= 75 ? 'Good Work!' : pct >= 60 ? 'Keep Studying' : 'More Practice Needed';
+
+  app.innerHTML = `
+    <div class="results-screen">
+      <div class="quiz-title">Quiz Complete</div>
+      <div class="results-score-big">${pct}%</div>
+      <div class="results-label">${grade}</div>
+      <div class="results-breakdown">
+        <div class="results-stat">
+          <div class="stat-num" style="color:#22c55e">${score}</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="results-stat">
+          <div class="stat-num" style="color:#ef4444">${wrong}</div>
+          <div class="stat-label">Incorrect</div>
+        </div>
+        <div class="results-stat">
+          <div class="stat-num">${QUESTIONS.length}</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+      <button class="restart-btn" onclick="restartQuiz()">Try Again</button>
+    </div>
+  `;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────
+function startQuiz() {
+  started = true;
+  render();
+}
+
+function selectAnswer(i) {
+  if (answered) return;
+  answered = true;
+  results[current] = i;
+  if (i === QUESTIONS[current].correct) score++;
+  render();
+}
+
+function toggleHint() {
+  hintOpen = !hintOpen;
+  render();
+}
+
+function nextQuestion() {
+  current++;
+  answered = false;
+  hintOpen = false;
+  render();
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  answered = false;
+  hintOpen = false;
+  results = [];
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
