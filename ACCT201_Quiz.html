@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACCT 201 Final Exam Quiz — UNL</title>
+<style>
+:root {
+  --red: #D00000;
+  --dark-red: #8b0000;
+  --correct: #27ae60;
+  --incorrect: #e74c3c;
+  --selected: #2980b9;
+  --gray: #e0e0e0;
+  --light: #f5f5f5;
+  --text: #222;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--light); color: var(--text); min-height: 100vh; }
+header { background: var(--red); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+header h1 { font-size: 1.3rem; }
+header p { font-size: 0.8rem; opacity: 0.85; }
+.score-badge { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; }
+.container { max-width: 820px; margin: 0 auto; padding: 20px 16px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.tab-btn { padding: 8px 18px; border: 2px solid var(--red); border-radius: 20px; background: #fff; color: var(--red); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; }
+.tab-btn.active, .tab-btn:hover { background: var(--red); color: #fff; }
+/* HOME */
+.home-card { background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+.home-card h2 { font-size: 1.5rem; margin-bottom: 6px; }
+.home-card > p { color: #666; margin-bottom: 22px; }
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 20px; text-align: left; }
+.mode-card { border: 2px solid var(--gray); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; }
+.mode-card:hover, .mode-card.sel { border-color: var(--red); background: #fff5f5; }
+.mode-card h4 { margin-bottom: 4px; }
+.mode-card p { font-size: 0.78rem; color: #777; }
+.shuffle-row { margin-bottom: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.88rem; color: #555; }
+.start-btn { background: var(--red); color: #fff; border: none; padding: 13px 36px; border-radius: 30px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+.start-btn:hover { background: var(--dark-red); }
+/* PROGRESS */
+.prog-text { display: flex; justify-content: space-between; font-size: 0.78rem; color: #666; margin-bottom: 5px; }
+.prog-bar-bg { background: var(--gray); border-radius: 8px; height: 7px; margin-bottom: 16px; overflow: hidden; }
+.prog-bar { height: 100%; background: var(--red); border-radius: 8px; transition: width 0.3s; }
+/* QUESTION CARD */
+.q-card { background: #fff; border-radius: 12px; padding: 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 14px; }
+.q-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.q-num { background: var(--red); color: #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 700; flex-shrink: 0; }
+.q-topic { font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: 0.4px; }
+.q-type-badge { font-size: 0.72rem; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; color: #555; margin-left: auto; }
+.q-text { font-size: 1.08rem; font-weight: 600; line-height: 1.5; margin-bottom: 18px; }
+.options { display: flex; flex-direction: column; gap: 9px; }
+.option { display: flex; align-items: flex-start; gap: 12px; padding: 13px 15px; border: 2px solid var(--gray); border-radius: 8px; cursor: pointer; transition: all 0.15s; user-select: none; }
+.option:hover:not(.disabled) { border-color: var(--selected); background: #eaf4fd; }
+.option.sel { border-color: var(--selected); background: #ddeefb; }
+.option.right { border-color: var(--correct); background: #eafaf1; }
+.option.wrong { border-color: var(--incorrect); background: #fdf0f0; }
+.option.disabled { cursor: default; }
+.opt-letter { font-weight: 700; font-size: 0.88rem; color: #999; min-width: 18px; flex-shrink: 0; }
+.option.sel .opt-letter { color: var(--selected); }
+.option.right .opt-letter { color: var(--correct); }
+.option.wrong .opt-letter { color: var(--incorrect); }
+.opt-text { font-size: 0.93rem; line-height: 1.4; flex: 1; }
+.opt-icon { margin-left: auto; font-size: 1rem; flex-shrink: 0; }
+/* FEEDBACK */
+.feedback { margin-top: 14px; padding: 14px 16px; border-radius: 8px; font-size: 0.88rem; line-height: 1.6; display: none; }
+.feedback.show { display: block; }
+.feedback.fb-right { background: #eafaf1; border-left: 4px solid var(--correct); color: #1a5e3a; }
+.feedback.fb-wrong { background: #fdf0f0; border-left: 4px solid var(--incorrect); color: #7b1f1f; }
+.feedback strong { display: block; margin-bottom: 5px; font-size: 0.95rem; }
+/* BUTTONS */
+.btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all 0.15s; }
+.btn-primary { background: var(--red); color: #fff; }
+.btn-primary:hover { background: var(--dark-red); }
+.btn-sec { background: #fff; border: 2px solid var(--gray); color: #555; }
+.btn-sec:hover { border-color: #aaa; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.nav-label { font-size: 0.8rem; color: #888; }
+/* RESULTS */
+.results-page { text-align: center; padding: 36px 20px; }
+.results-circle { width: 130px; height: 130px; border-radius: 50%; background: var(--red); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 22px; }
+.results-circle .pct { font-size: 2rem; font-weight: 700; line-height: 1; }
+.results-circle .lbl { font-size: 0.75rem; opacity: 0.85; }
+.stats-row { display: flex; justify-content: center; gap: 16px; margin: 18px 0; flex-wrap: wrap; }
+.stat-box { background: #fff; padding: 14px 22px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+.stat-num { font-size: 1.7rem; font-weight: 700; color: var(--red); }
+.stat-lbl { font-size: 0.75rem; color: #777; }
+.results-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+/* EQUATIONS */
+.eq-section { background: #fff; border-radius: 12px; padding: 22px; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.eq-section h3 { color: var(--red); font-size: 1rem; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--gray); }
+.eq-item { display: flex; flex-direction: column; gap: 3px; margin-bottom: 11px; padding: 10px; background: var(--light); border-radius: 6px; }
+.eq-formula { font-family: 'Courier New', monospace; font-size: 0.88rem; background: #fff3e0; padding: 4px 10px; border-radius: 4px; color: #bf360c; display: inline-block; }
+.eq-desc { font-size: 0.82rem; color: #555; margin-top: 3px; }
+.dealor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dealor-col h4 { font-size: 0.88rem; margin-bottom: 8px; }
+.dealor-col ul { list-style: none; font-size: 0.83rem; line-height: 2; }
+@media (max-width: 560px) {
+  .q-card { padding: 18px 14px; }
+  header h1 { font-size: 1.05rem; }
+  .dealor-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>ACCT 201 Final Exam Quiz — UNL</h1>
+    <p>Principles of Accounting I &middot; ACCT-201-002</p>
+  </div>
+  <div class="score-badge" id="scoreBadge">Score: 0 / 0</div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(this,'quiz')">Quiz</button>
+    <button class="tab-btn" onclick="showTab(this,'eq')">Key Equations</button>
+  </div>
+
+  <!-- HOME -->
+  <div id="homeView">
+    <div class="home-card">
+      <h2>Ready to Study?</h2>
+      <p>50 questions &mdash; multiple choice and select-all-that-apply</p>
+      <div class="mode-grid">
+        <div class="mode-card sel" onclick="pickMode(this,'all')"><h4>All Topics</h4><p>All 50 questions</p></div>
+        <div class="mode-card" onclick="pickMode(this,'statements')"><h4>Financial Statements</h4><p>Statements, equation, account types</p></div>
+        <div class="mode-card" onclick="pickMode(this,'journal')"><h4>Journal Entries</h4><p>Debits, credits, equation effects</p></div>
+        <div class="mode-card" onclick="pickMode(this,'inventory')"><h4>Inventory &amp; COGS</h4><p>FIFO, LIFO, weighted average</p></div>
+        <div class="mode-card" onclick="pickMode(this,'ppe')"><h4>PP&amp;E &amp; Depreciation</h4><p>Long-term assets, amortization</p></div>
+        <div class="mode-card" onclick="pickMode(this,'calc')"><h4>Calculations</h4><p>Number-crunching questions</p></div>
+      </div>
+      <div class="shuffle-row">
+        <input type="checkbox" id="shuffleChk" checked>
+        <label for="shuffleChk">Shuffle questions</label>
+      </div>
+      <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quizView" style="display:none;">
+    <div class="prog-text"><span id="progLabel">Question 1 of 50</span><span id="progPct">0%</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+    <div class="q-card">
+      <div class="q-meta">
+        <div class="q-num" id="qNum">1</div>
+        <div><div class="q-topic" id="qTopic"></div></div>
+        <div class="q-type-badge" id="qTypeBadge">Single Answer</div>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsEl"></div>
+      <div class="feedback" id="feedbackEl"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">Check Answer</button>
+        <button class="btn btn-sec" id="nextBtn" style="display:none;" onclick="nextQ()">Next</button>
+        <button class="btn btn-sec" onclick="goHome()">Menu</button>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-sec" onclick="prevQ()">Previous</button>
+      <span class="nav-label" id="navLabel"></span>
+      <button class="btn btn-sec" onclick="nextQ()">Next</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsView" style="display:none;">
+    <div class="results-page">
+      <div class="results-circle"><div class="pct" id="resPct">0%</div><div class="lbl">Score</div></div>
+      <h2 id="resTitle"></h2>
+      <p id="resMsg" style="color:#666;margin-top:6px;"></p>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="resRight">0</div><div class="stat-lbl">Correct</div></div>
+        <div class="stat-box"><div class="stat-num" id="resWrong">0</div><div class="stat-lbl">Incorrect</div></div>
+        <div class="stat-box"><div class="stat-num" id="resTotal">0</div><div class="stat-lbl">Answered</div></div>
+      </div>
+      <div class="results-btns">
+        <button class="start-btn" onclick="goHome()">Try Again</button>
+        <button class="btn btn-sec" style="padding:13px 24px;font-size:0.95rem;" onclick="reviewMode()">Review Answers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EQUATIONS -->
+  <div id="eqView" style="display:none;">
+    <div class="eq-section">
+      <h3>Core Accounting Equations</h3>
+      <div class="eq-item"><div class="eq-formula">Assets = Liabilities + Stockholders' Equity</div><div class="eq-desc">The fundamental accounting equation — basis of every balance sheet</div></div>
+      <div class="eq-item"><div class="eq-formula">Net Income = Revenues - Expenses</div><div class="eq-desc">Shown on the income statement; covers a period of time</div></div>
+      <div class="eq-item"><div class="eq-formula">RE(end) = RE(beg) + Net Income - Dividends</div><div class="eq-desc">Retained Earnings — links income statement to the balance sheet</div></div>
+    </div>
+    <div class="eq-section">
+      <h3>Multi-Step Income Statement Subtotals</h3>
+      <div class="eq-item"><div class="eq-formula">Gross Profit = Sales Revenue - COGS</div><div class="eq-desc">First subtotal in a multi-step income statement</div></div>
+      <div class="eq-item"><div class="eq-formula">Operating Income = Gross Profit - Operating Expenses</div><div class="eq-desc">Profit from core business operations</div></div>
+      <div class="eq-item"><div class="eq-formula">Pre-tax Income = Operating Income + Nonoperating Income</div><div class="eq-desc">Includes investing and financing-related items</div></div>
+      <div class="eq-item"><div class="eq-formula">Net Income = Pre-tax Income - Income Tax Expense</div><div class="eq-desc">The "bottom line" — also called earnings or profit</div></div>
+    </div>
+    <div class="eq-section">
+      <h3>Inventory &amp; COGS</h3>
+      <div class="eq-item"><div class="eq-formula">COGS = Beg. Inventory + Purchases - End. Inventory</div><div class="eq-desc">Rearrange to solve for any missing variable</div></div>
+      <div class="eq-item"><div class="eq-formula">Weighted Avg. Cost/unit = Total Cost Available / Total Units Available</div><div class="eq-desc">Used under the weighted average cost flow assumption</div></div>
+      <div class="eq-item"><div class="eq-formula">Rising prices: LIFO = higher COGS, lower ending inventory</div><div class="eq-desc">FIFO = lower COGS, higher ending inventory &mdash; opposite in falling prices</div></div>
+    </div>
+    <div class="eq-section">
+      <h3>PP&amp;E &amp; Depreciation</h3>
+      <div class="eq-item"><div class="eq-formula">Annual Depreciation = (Cost - Residual Value) / Service Life</div><div class="eq-desc">Straight-line method — same expense each full year</div></div>
+      <div class="eq-item"><div class="eq-formula">Partial Year = Annual Depreciation x (Months Used / 12)</div><div class="eq-desc">When asset is purchased partway through the year</div></div>
+      <div class="eq-item"><div class="eq-formula">Book Value = Cost - Accumulated Depreciation</div><div class="eq-desc">Net carrying value shown on the balance sheet</div></div>
+    </div>
+    <div class="eq-section">
+      <h3>Receivables &amp; Interest</h3>
+      <div class="eq-item"><div class="eq-formula">Net AR = Accounts Receivable - Allowance for Uncollectible Accounts</div><div class="eq-desc">Net realizable value — the amount the company expects to collect</div></div>
+      <div class="eq-item"><div class="eq-formula">Interest = Principal x Annual Rate x (Time / 12)</div><div class="eq-desc">Time in months; use /365 if given days</div></div>
+    </div>
+    <div class="eq-section">
+      <h3>Stockholders' Equity</h3>
+      <div class="eq-item"><div class="eq-formula">APIC = Cash Received - (Shares Issued x Par Value)</div><div class="eq-desc">Additional Paid-in Capital — the "plug" for par value stock issuances</div></div>
+      <div class="eq-item"><div class="eq-formula">Shares Outstanding = Shares Issued - Treasury Shares</div><div class="eq-desc">Only outstanding shares receive dividends</div></div>
+      <div class="eq-item"><div class="eq-formula">Dividends = Shares Outstanding x Dividend Per Share</div><div class="eq-desc">Used to calculate total dividends declared or paid</div></div>
+    </div>
+    <div class="eq-section">
+      <h3>Normal Balances — DEALOR Rule</h3>
+      <div class="eq-item">
+        <div class="dealor-grid">
+          <div class="dealor-col">
+            <h4 style="color:var(--red);">DEBIT balance (increase with debit)</h4>
+            <ul>
+              <li><strong>D</strong>ividends</li>
+              <li><strong>E</strong>xpenses</li>
+              <li><strong>A</strong>ssets</li>
+            </ul>
+          </div>
+          <div class="dealor-col">
+            <h4 style="color:var(--correct);">CREDIT balance (increase with credit)</h4>
+            <ul>
+              <li><strong>L</strong>iabilities</li>
+              <li><strong>O</strong>wners' (Stockholders') Equity</li>
+              <li><strong>R</strong>evenues</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LETTERS = ['A','B','C','D','E','F'];
+
+const QUESTIONS = [
+  // --- FINANCIAL STATEMENTS & CONCEPTS ---
+  {id:1,topic:"Financial Statements",type:"single",
+   text:"Which of the following best defines an asset?",
+   opts:["Obligations owed to creditors","Resources expected to generate future benefits","Owner contributions only","Cash inflows from customers"],
+   ans:[1],
+   exp:"Assets are resources of a company expected to generate future benefits. They appear on the balance sheet."},
+  {id:2,topic:"Financial Statements",type:"single",
+   text:"Which financial statement shows a company's financial position at a specific point in time?",
+   opts:["Income statement","Statement of cash flows","Balance sheet","Statement of stockholders' equity"],
+   ans:[2],
+   exp:"The balance sheet is a snapshot as of a specific date (e.g., December 31). The other three statements cover a period of time."},
+  {id:3,topic:"Financial Statements",type:"single",
+   text:"What is the correct accounting equation?",
+   opts:["Assets = Liabilities - Equity","Assets = Liabilities + Stockholders' Equity","Equity = Assets + Liabilities","Revenues = Expenses + Assets"],
+   ans:[1],
+   exp:"Assets = Liabilities + Stockholders' Equity is the fundamental accounting equation and the basis of every balance sheet."},
+  {id:4,topic:"Account Types",type:"single",
+   text:"Which account type normally has a credit balance?",
+   opts:["Expenses","Assets","Dividends","Revenues"],
+   ans:[3],
+   exp:"DEALOR: Liabilities, Owners' Equity, and Revenues have credit balances. Dividends, Expenses, and Assets have debit balances."},
+  {id:5,topic:"Financial Statements",type:"single",
+   text:"Which of the following is NOT included on the income statement?",
+   opts:["Revenues","Expenses","Dividends","Net income"],
+   ans:[2],
+   exp:"Dividends are distributions to stockholders — they appear on the Statement of Stockholders' Equity as a reduction to retained earnings, NOT as an expense on the income statement."},
+  {id:6,topic:"Financial Statements",type:"single",
+   text:"Gross profit is calculated as:",
+   opts:["Revenues - Expenses","Sales Revenue - Cost of Goods Sold","Assets - Liabilities","Net Income - Dividends"],
+   ans:[1],
+   exp:"Gross Profit = Sales Revenue - COGS. It is the first subtotal in a multi-step income statement."},
+  {id:7,topic:"Financial Statements",type:"single",
+   text:"Which statement about retained earnings is correct?",
+   opts:["It represents cash held in a bank account","It equals total assets minus liabilities","It is cumulative profits kept in the business","It is revenue earned this period"],
+   ans:[2],
+   exp:"Retained earnings is the cumulative net income reinvested in the business rather than paid out as dividends. It is NOT a cash balance — cash and retained earnings are completely different."},
+  {id:8,topic:"Accrual Accounting",type:"single",
+   text:"Under accrual-basis accounting, revenue is recorded when:",
+   opts:["Cash is received from the customer","Goods or services are provided to the customer","The customer pays the invoice","Expenses are incurred"],
+   ans:[1],
+   exp:"Under accrual-basis accounting (required by GAAP), revenues are recognized when goods/services are delivered, regardless of when cash is received."},
+  {id:9,topic:"Account Types",type:"single",
+   text:"Which of the following is a current asset?",
+   opts:["Building","Patent","Inventory","Bonds payable"],
+   ans:[2],
+   exp:"Current assets convert to cash or are consumed within 1 year. Inventory qualifies. Buildings and patents are long-term; bonds payable is a liability."},
+  {id:10,topic:"Account Types",type:"single",
+   text:"A contra-asset account typically has a:",
+   opts:["Debit balance","Credit balance","Zero balance","Variable balance"],
+   ans:[1],
+   exp:"A contra-asset (e.g., Accumulated Depreciation, Allowance for Uncollectible Accounts) exists to reduce its related asset. Since assets normally have debit balances, the contra-asset carries a credit balance."},
+  // --- JOURNAL ENTRY / EQUATION EFFECTS ---
+  {id:11,topic:"Journal Entries",type:"single",
+   text:"A company issues common stock in exchange for cash. What is the effect on the accounting equation?",
+   opts:["Assets up, Liabilities up","Assets up, Equity up","Assets down, Equity up","Liabilities up, Equity down"],
+   ans:[1],
+   exp:"Dr. Cash (asset up), Cr. Common Stock (equity up). Issuing stock increases both assets and equity — no effect on liabilities."},
+  {id:12,topic:"Journal Entries",type:"single",
+   text:"A company pays cash to purchase office supplies. What is the effect?",
+   opts:["Assets up, Liabilities up","Assets down, Equity down","Cash decreases and Supplies increases — no net change in total assets","Equity up only"],
+   ans:[2],
+   exp:"Dr. Supplies (asset up), Cr. Cash (asset down). One asset rises and another falls — no net change in total assets, liabilities, or equity. Supplies are NOT expensed until used."},
+  {id:13,topic:"Journal Entries",type:"single",
+   text:"A company borrows cash from a bank and signs a note payable. What happens?",
+   opts:["Assets up, Equity up","Assets up, Liabilities up","Assets down, Liabilities down","Equity down, Liabilities up"],
+   ans:[1],
+   exp:"Dr. Cash (asset up), Cr. Notes Payable (liability up). Borrowing increases both assets and liabilities by the same amount."},
+  {id:14,topic:"Journal Entries",type:"single",
+   text:"A company performs services on account (bills a customer who will pay later). What is the effect?",
+   opts:["Assets up, Equity up","Assets down, Equity down","Liabilities up, Equity down","No effect — cash hasn't been received"],
+   ans:[0],
+   exp:"Dr. Accounts Receivable (asset up), Cr. Service Revenue (equity up via retained earnings). Revenue is recognized when services are provided, not when cash is collected."},
+  {id:15,topic:"Journal Entries",type:"single",
+   text:"A company pays employees' salaries in cash. What is the effect?",
+   opts:["Assets up, Equity up","Assets down, Equity down","Liabilities up, Equity down","Assets down, Liabilities down"],
+   ans:[1],
+   exp:"Dr. Salaries Expense (equity down through retained earnings), Cr. Cash (asset down). Paying an expense reduces both assets and equity."},
+  {id:16,topic:"Journal Entries",type:"single",
+   text:"A company receives cash in advance from a customer for services not yet provided. What is the effect?",
+   opts:["Assets up, Equity up","Assets up, Liabilities up","Assets down, Liabilities down","Equity up only"],
+   ans:[1],
+   exp:"Dr. Cash (asset up), Cr. Deferred Revenue (liability up). Since the service hasn't been delivered, the company owes the customer — this is a liability, NOT revenue yet."},
+  {id:17,topic:"Financial Statements",type:"single",
+   text:"Dividends declared and paid are best described as:",
+   opts:["An operating expense","A current liability","A distribution of net income to stockholders","A form of revenue"],
+   ans:[2],
+   exp:"Dividends are distributions to owners, not an expense. They reduce retained earnings in the Statement of Stockholders' Equity — they do NOT appear on the income statement."},
+  {id:18,topic:"Closing Entries",type:"single",
+   text:"Which accounts are closed (zeroed out) at the end of each accounting period?",
+   opts:["Assets and liabilities only","Revenues, expenses, and dividends","Equity accounts only","Cash and accounts receivable"],
+   ans:[1],
+   exp:"Temporary accounts (revenues, expenses, dividends) are closed to Retained Earnings each period. Permanent accounts (assets, liabilities, equity) carry forward their balances."},
+  {id:19,topic:"Accrual Accounting",type:"single",
+   text:"Which accounting method records revenues and expenses only when cash is received or paid?",
+   opts:["Accrual basis","GAAP basis","Cash basis","Matching principle"],
+   ans:[2],
+   exp:"Cash-basis records revenue/expenses when cash changes hands. Accrual-basis (required by GAAP) records them when earned or incurred regardless of cash timing."},
+  {id:20,topic:"Inventory",type:"single",
+   text:"Cost of Goods Sold (COGS) represents:",
+   opts:["Total inventory purchased during the period","The cost of inventory sold during the period","The value of ending inventory","Total revenue from product sales"],
+   ans:[1],
+   exp:"COGS is the cost to the company of inventory units sold. It is the second line on a multi-step income statement and the only expense without the word 'expense' in its name."},
+  // --- INVENTORY ---
+  {id:21,topic:"Inventory",type:"single",
+   text:"Beginning inventory = $5,000 | Purchases = $20,000 | Ending inventory = $8,000. What is COGS?",
+   opts:["$25,000","$17,000","$13,000","$33,000"],
+   ans:[1],
+   exp:"COGS = Beg. Inventory + Purchases - End. Inventory = $5,000 + $20,000 - $8,000 = $17,000."},
+  {id:22,topic:"Inventory",type:"single",
+   text:"In a period of rising prices, which correctly compares FIFO to LIFO?",
+   opts:["FIFO produces higher COGS and lower ending inventory than LIFO","FIFO produces lower COGS and higher ending inventory than LIFO","FIFO and LIFO always produce identical results","FIFO produces the same COGS but lower ending inventory"],
+   ans:[1],
+   exp:"Rising prices: LIFO sends the newest (most expensive) costs to COGS — higher COGS, lower ending inventory. FIFO sends older (cheaper) costs to COGS — lower COGS, higher ending inventory."},
+  {id:23,topic:"Inventory",type:"single",
+   text:"Which cost flow assumption assigns the most recent costs to COGS?",
+   opts:["FIFO","Weighted Average","Specific Identification","LIFO"],
+   ans:[3],
+   exp:"LIFO (Last In, First Out) assigns the most recently purchased (last in) costs to COGS first."},
+  {id:24,topic:"Inventory",type:"single",
+   text:"In a period of falling prices, which statement is correct about LIFO compared to FIFO?",
+   opts:["LIFO has higher COGS","LIFO has higher ending inventory than FIFO","LIFO and FIFO produce the same ending inventory","LIFO has lower ending inventory than FIFO"],
+   ans:[1],
+   exp:"Falling prices: LIFO assigns newer (cheaper) costs to COGS → lower COGS, higher ending inventory. FIFO assigns older (more expensive) costs to COGS → higher COGS, lower ending inventory."},
+  // --- PP&E & DEPRECIATION ---
+  {id:25,topic:"PP&E & Depreciation",type:"single",
+   text:"Which inputs are required to calculate straight-line depreciation?",
+   opts:["Cost only","Cost, residual value, and service life","Market value and residual value","Cost and useful life (no residual value needed)"],
+   ans:[1],
+   exp:"Straight-line depreciation = (Cost - Residual Value) / Service Life. All three components are required."},
+  {id:26,topic:"PP&E & Depreciation",type:"single",
+   text:"Equipment costs $50,000, has a $5,000 residual value, and a 5-year service life. Annual depreciation is:",
+   opts:["$10,000","$9,000","$45,000","$5,000"],
+   ans:[1],
+   exp:"($50,000 - $5,000) / 5 = $45,000 / 5 = $9,000 per year."},
+  {id:27,topic:"PP&E & Depreciation",type:"single",
+   text:"The journal entry to record annual depreciation is:",
+   opts:["Dr. Equipment / Cr. Cash","Dr. Depreciation Expense / Cr. Accumulated Depreciation","Dr. Accumulated Depreciation / Cr. Depreciation Expense","Dr. Cash / Cr. Equipment"],
+   ans:[1],
+   exp:"Dr. Depreciation Expense (income statement — reduces net income), Cr. Accumulated Depreciation (contra-asset on balance sheet — reduces net book value of the asset)."},
+  {id:28,topic:"PP&E & Depreciation",type:"single",
+   text:"An asset costs $100,000 and has accumulated depreciation of $40,000. Its book value is:",
+   opts:["$140,000","$100,000","$60,000","$40,000"],
+   ans:[2],
+   exp:"Book Value = Cost - Accumulated Depreciation = $100,000 - $40,000 = $60,000."},
+  {id:29,topic:"PP&E & Depreciation",type:"single",
+   text:"Which of the following costs would NOT be capitalized as part of a newly purchased machine's cost?",
+   opts:["Purchase price","Freight and delivery costs","Installation and setup costs","Routine maintenance costs after the machine is in service"],
+   ans:[3],
+   exp:"Cost of PP&E includes all costs to acquire and ready the asset for use: purchase price, freight, installation. Routine maintenance after the asset is in service is expensed immediately."},
+  // --- INTANGIBLES ---
+  {id:30,topic:"Intangibles",type:"single",
+   text:"For internally developed intangible assets (e.g., patents), which costs are capitalized?",
+   opts:["All research and development costs","Only legal and filing fees","All labor costs during development","Total development cost minus R&D"],
+   ans:[1],
+   exp:"Almost all R&D costs for internally developed intangibles must be expensed immediately. Only legal and filing fees are capitalized as the intangible asset."},
+  {id:31,topic:"Intangibles",type:"single",
+   text:"Purchased intangible assets are initially recorded at:",
+   opts:["Fair market value","Historical cost","Net realizable value","Appraised value"],
+   ans:[1],
+   exp:"Purchased intangibles (like a patent bought from another company) are recorded at cost, the same as PP&E. They are then amortized over their useful life using straight-line amortization."},
+  // --- ADJUSTING ENTRIES ---
+  {id:32,topic:"Adjusting Entries",type:"single",
+   text:"Which adjusting entry records supplies used during the period?",
+   opts:["Dr. Cash / Cr. Supplies Expense","Dr. Supplies Expense / Cr. Supplies","Dr. Supplies / Cr. Cash","Dr. Supplies Expense / Cr. Cash"],
+   ans:[1],
+   exp:"Dr. Supplies Expense (recognizes the cost), Cr. Supplies (reduces the asset). This is an adjusting entry made when preparing financial statements."},
+  {id:33,topic:"Adjusting Entries",type:"single",
+   text:"A company prepays 12 months of rent for $12,000 on July 1. How much rent expense is recorded by December 31?",
+   opts:["$12,000","$1,000","$6,000","$2,000"],
+   ans:[2],
+   exp:"$12,000 x (6 months / 12 months) = $6,000. The remaining $6,000 stays as Prepaid Rent (an asset) on the December 31 balance sheet."},
+  {id:34,topic:"Adjusting Entries",type:"single",
+   text:"An adjusting entry for accrued salaries (employees worked but haven't been paid) is:",
+   opts:["Dr. Cash / Cr. Salaries Expense","Dr. Salaries Expense / Cr. Salaries Payable","Dr. Salaries Payable / Cr. Cash","Dr. Prepaid Salaries / Cr. Cash"],
+   ans:[1],
+   exp:"Dr. Salaries Expense (recognizes the cost in the period earned), Cr. Salaries Payable (creates the liability). When paid later: Dr. Salaries Expense + Dr. Salaries Payable / Cr. Cash."},
+  {id:35,topic:"Adjusting Entries",type:"single",
+   text:"What is an adjusting journal entry?",
+   opts:["A correction to a prior period's error","An entry made at the start of a new period","An entry made at period end to record activity not yet captured","An entry to record cash transactions"],
+   ans:[2],
+   exp:"Adjusting entries are made when preparing financial statements to record revenues earned and expenses incurred that haven't been recorded due to timing differences between cash and accrual accounting."},
+  // --- RECEIVABLES / LIABILITIES ---
+  {id:36,topic:"Receivables",type:"single",
+   text:"Accounts receivable is reported on the balance sheet at:",
+   opts:["The amount customers owe (gross)","Net realizable value (gross AR minus allowance for uncollectible accounts)","Fair market value","The amount already collected in cash"],
+   ans:[1],
+   exp:"AR is reported at net realizable value = Accounts Receivable - Allowance for Uncollectible Accounts. This represents the amount the company actually expects to collect."},
+  {id:37,topic:"Account Types",type:"single",
+   text:"Deferred Revenue is classified as:",
+   opts:["A current asset","A revenue account on the income statement","A liability","An expense"],
+   ans:[2],
+   exp:"Deferred Revenue is a liability — the company received cash but still owes goods/services. Revenue is not recognized until performance occurs. Despite having 'revenue' in its name, it does NOT go on the income statement."},
+  // --- NOTES PAYABLE / INTEREST ---
+  {id:38,topic:"Notes Payable",type:"single",
+   text:"How is interest expense on a note calculated for a partial period?",
+   opts:["Principal x Rate","Principal x Rate x (Months / 12)","Principal / Rate","(Principal + Rate) / Time"],
+   ans:[1],
+   exp:"Interest = Principal x Annual Interest Rate x (Time / 12). For example, $10,000 at 6% for 3 months = $10,000 x 0.06 x 3/12 = $150."},
+  {id:39,topic:"Notes Payable",type:"single",
+   text:"A $10,000 note at 6% annual interest is outstanding for 3 months. Total interest at the end of 3 months is:",
+   opts:["$600","$150","$300","$180"],
+   ans:[1],
+   exp:"$10,000 x 6% x (3/12) = $10,000 x 0.06 x 0.25 = $150."},
+  // --- STOCKHOLDERS' EQUITY ---
+  {id:40,topic:"Stockholders' Equity",type:"single",
+   text:"Additional Paid-in Capital (APIC) represents:",
+   opts:["Total cash received from all stock sales ever","The par value of shares issued","The amount investors paid above par value per share","Retained earnings from prior periods"],
+   ans:[2],
+   exp:"APIC = Cash Received - (Shares Issued x Par Value per share). It represents the premium investors paid over par value."},
+  {id:41,topic:"Stockholders' Equity",type:"single",
+   text:"Treasury stock is reported as:",
+   opts:["A long-term asset","Revenue from stock buy-backs","A reduction in stockholders' equity","A long-term liability"],
+   ans:[2],
+   exp:"Treasury stock is a contra-equity account with a debit balance — it reduces total stockholders' equity. Companies do NOT pay dividends on treasury shares."},
+  {id:42,topic:"Stockholders' Equity",type:"single",
+   text:"A company declares dividends of $5,000 to be paid next month. The journal entry on the declaration date is:",
+   opts:["Dr. Dividends Expense / Cr. Cash","Dr. Dividends / Cr. Dividends Payable","Dr. Dividends Payable / Cr. Cash","No entry needed until cash is paid"],
+   ans:[1],
+   exp:"Declaration date: Dr. Dividends, Cr. Dividends Payable (creates the liability). Payment date: Dr. Dividends Payable, Cr. Cash. Dividends are NOT an expense."},
+  // --- CALCULATIONS ---
+  {id:43,topic:"Calculations",type:"single",
+   text:"Assets = $200,000 | Liabilities = $75,000. What is Stockholders' Equity?",
+   opts:["$275,000","$125,000","$75,000","$200,000"],
+   ans:[1],
+   exp:"Assets = Liabilities + SE → SE = $200,000 - $75,000 = $125,000."},
+  {id:44,topic:"Calculations",type:"single",
+   text:"Beginning Retained Earnings = $50,000 | Net Income = $30,000 | Dividends = $10,000. Ending RE = ?",
+   opts:["$70,000","$90,000","$80,000","$60,000"],
+   ans:[0],
+   exp:"RE(end) = RE(beg) + Net Income - Dividends = $50,000 + $30,000 - $10,000 = $70,000."},
+  {id:45,topic:"Calculations",type:"single",
+   text:"A customer pays their outstanding accounts receivable balance. The effect is:",
+   opts:["Revenue is recognized at payment","Cash increases and Accounts Receivable decreases — no income statement effect","Total liabilities decrease","Net income increases"],
+   ans:[1],
+   exp:"Dr. Cash, Cr. Accounts Receivable. One asset goes up and another goes down — no net change in total assets, no liabilities or equity effect. Revenue was already recorded at the time of the original sale."},
+  // --- SELECT ALL ---
+  {id:46,topic:"Account Types",type:"multi",
+   text:"SELECT ALL THAT APPLY: Which of the following are examples of current liabilities?",
+   opts:["Accounts payable","Notes payable due in 5 years","Salaries payable","Deferred revenue (to be earned next month)","Bonds payable due in 10 years"],
+   ans:[0,2,3],
+   exp:"Current liabilities are due within 1 year: Accounts payable, Salaries payable, and short-term Deferred revenue. Notes payable due in 5 years and bonds due in 10 years are noncurrent liabilities."},
+  {id:47,topic:"Closing Entries",type:"multi",
+   text:"SELECT ALL THAT APPLY: Which are temporary accounts closed at period end?",
+   opts:["Revenue","Cash","Expenses","Dividends","Retained Earnings","Notes Payable"],
+   ans:[0,2,3],
+   exp:"Temporary accounts (zeroed out each period): Revenues, Expenses, Dividends. Permanent accounts (carry forward): Cash, Retained Earnings, Notes Payable."},
+  {id:48,topic:"Financial Statements",type:"multi",
+   text:"SELECT ALL THAT APPLY: Which of the following appear on the balance sheet?",
+   opts:["Service Revenue","Accounts Receivable","Cost of Goods Sold","Inventory","Accumulated Depreciation"],
+   ans:[1,3,4],
+   exp:"Balance sheet items: Accounts Receivable (current asset), Inventory (current asset), Accumulated Depreciation (contra-asset). Service Revenue and COGS appear on the income statement."},
+  {id:49,topic:"Adjusting Entries",type:"multi",
+   text:"SELECT ALL THAT APPLY: Which situations require an adjusting entry at period end?",
+   opts:["Prepaid insurance — time has elapsed","A cash sale made at the time of sale","Accrued salaries not yet paid","Supplies on hand are less than what was purchased","Equipment purchased for cash"],
+   ans:[0,2,3],
+   exp:"Adjusting entries are needed for: prepaid insurance expiration, accrued salaries (expense incurred but not paid), and supplies used. Cash sales and equipment purchases are recorded immediately when they occur."},
+  {id:50,topic:"Account Types",type:"multi",
+   text:"SELECT ALL THAT APPLY: Under the DEALOR rule, which accounts normally have a DEBIT balance?",
+   opts:["Dividends","Liabilities","Expenses","Assets","Revenues","Owners' Equity"],
+   ans:[0,2,3],
+   exp:"DEALOR: Dividends, Expenses, Assets have debit balances (increase with a debit). Liabilities, Owners' Equity, and Revenues have credit balances."}
+];
+
+const TOPIC_FILTER = {
+  all: null,
+  statements: ["Financial Statements","Account Types","Accrual Accounting"],
+  journal: ["Journal Entries","Adjusting Entries","Closing Entries"],
+  inventory: ["Inventory"],
+  ppe: ["PP&E & Depreciation","Intangibles"],
+  calc: ["Calculations","Notes Payable","Receivables","Stockholders' Equity"]
+};
+
+let mode = 'all';
+let quiz = [];
+let idx = 0;
+let selected = {};   // qid -> [indices]
+let submitted = {};  // qid -> bool (correct?)
+let score = 0;
+let answered = 0;
+
+function pickMode(el, m) {
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  mode = m;
+}
+
+function startQuiz() {
+  const filter = TOPIC_FILTER[mode];
+  quiz = filter ? QUESTIONS.filter(q => filter.includes(q.topic)) : [...QUESTIONS];
+  if (document.getElementById('shuffleChk').checked) quiz.sort(() => Math.random() - 0.5);
+  idx = 0; selected = {}; submitted = {}; score = 0; answered = 0;
+  updateBadge();
+  show('quizView');
+  render();
+}
+
+function show(id) {
+  ['homeView','quizView','resultsView','eqView'].forEach(v => {
+    document.getElementById(v).style.display = 'none';
+  });
+  document.getElementById(id).style.display = 'block';
+}
+
+function showTab(btn, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'eq') {
+    show('eqView');
+  } else {
+    const inProgress = quiz.length > 0 && idx < quiz.length && document.getElementById('quizView').style.display === 'block';
+    if (inProgress) show('quizView');
+    else show('homeView');
+  }
+}
+
+function goHome() { show('homeView'); }
+
+function render() {
+  if (idx >= quiz.length) { showResults(); return; }
+  const q = quiz[idx];
+  const pct = Math.round((idx / quiz.length) * 100);
+  document.getElementById('progBar').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = 'Question ' + (idx+1) + ' of ' + quiz.length;
+  document.getElementById('progPct').textContent = pct + '%';
+  document.getElementById('navLabel').textContent = (idx+1) + ' / ' + quiz.length;
+  document.getElementById('qNum').textContent = idx + 1;
+  document.getElementById('qTopic').textContent = q.topic;
+  document.getElementById('qTypeBadge').textContent = q.type === 'multi' ? 'Select All That Apply' : 'Single Answer';
+  document.getElementById('qText').textContent = q.text;
+
+  const mySelected = selected[q.id] || [];
+  const isSubmitted = submitted[q.id] !== undefined;
+  const container = document.getElementById('optionsEl');
+  container.innerHTML = '';
+
+  q.opts.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    if (isSubmitted) {
+      div.classList.add('disabled');
+      if (q.ans.includes(i)) div.classList.add('right');
+      else if (mySelected.includes(i)) div.classList.add('wrong');
+    } else if (mySelected.includes(i)) {
+      div.classList.add('sel');
+    }
+    const icon = isSubmitted ? (q.ans.includes(i) ? '&#10003;' : (mySelected.includes(i) ? '&#10007;' : '')) : '';
+    div.innerHTML = '<span class="opt-letter">' + LETTERS[i] + '</span><span class="opt-text">' + opt + '</span><span class="opt-icon">' + icon + '</span>';
+    if (!isSubmitted) div.addEventListener('click', () => toggle(q, i));
+    container.appendChild(div);
+  });
+
+  const fb = document.getElementById('feedbackEl');
+  const subBtn = document.getElementById('submitBtn');
+  const nxtBtn = document.getElementById('nextBtn');
+
+  if (isSubmitted) {
+    const wasRight = submitted[q.id];
+    fb.className = 'feedback show ' + (wasRight ? 'fb-right' : 'fb-wrong');
+    fb.innerHTML = '<strong>' + (wasRight ? 'Correct!' : 'Incorrect') + '</strong>' + q.exp;
+    subBtn.style.display = 'none';
+    if (idx < quiz.length - 1) {
+      nxtBtn.textContent = 'Next';
+      nxtBtn.onclick = nextQ;
+      nxtBtn.style.display = 'inline-block';
+    } else {
+      nxtBtn.textContent = 'See Results';
+      nxtBtn.onclick = showResults;
+      nxtBtn.style.display = 'inline-block';
+    }
+  } else {
+    fb.className = 'feedback';
+    fb.innerHTML = '';
+    subBtn.style.display = 'inline-block';
+    nxtBtn.style.display = 'none';
+  }
+}
+
+function toggle(q, i) {
+  if (!selected[q.id]) selected[q.id] = [];
+  if (q.type === 'single') {
+    selected[q.id] = [i];
+  } else {
+    const pos = selected[q.id].indexOf(i);
+    if (pos === -1) selected[q.id].push(i);
+    else selected[q.id].splice(pos, 1);
+  }
+  render();
+}
+
+function submitAnswer() {
+  const q = quiz[idx];
+  const my = (selected[q.id] || []).slice().sort().join(',');
+  const correct = q.ans.slice().sort().join(',');
+  if (!selected[q.id] || selected[q.id].length === 0) {
+    const fb = document.getElementById('feedbackEl');
+    fb.className = 'feedback show fb-wrong';
+    fb.innerHTML = '<strong>Select an answer first.</strong>';
+    return;
+  }
+  const isRight = my === correct;
+  submitted[q.id] = isRight;
+  answered++;
+  if (isRight) score++;
+  updateBadge();
+  render();
+}
+
+function nextQ() {
+  if (idx < quiz.length - 1) { idx++; render(); }
+  else showResults();
+}
+
+function prevQ() {
+  if (idx > 0) { idx--; render(); }
+}
+
+function showResults() {
+  show('resultsView');
+  const total = Object.keys(submitted).length;
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  document.getElementById('resPct').textContent = pct + '%';
+  document.getElementById('resRight').textContent = score;
+  document.getElementById('resWrong').textContent = total - score;
+  document.getElementById('resTotal').textContent = total;
+  const title = document.getElementById('resTitle');
+  const msg = document.getElementById('resMsg');
+  if (pct >= 90) { title.textContent = 'Excellent Work!'; msg.textContent = 'You are ready for the final. Go Huskers!'; }
+  else if (pct >= 75) { title.textContent = 'Good Job!'; msg.textContent = 'Solid understanding. Review the questions you missed and you will be set.'; }
+  else if (pct >= 60) { title.textContent = 'Keep Studying'; msg.textContent = 'Review the Key Equations tab and retake the quiz.'; }
+  else { title.textContent = 'More Practice Needed'; msg.textContent = 'Go back to your study guide for the topics you missed, then try again.'; }
+}
+
+function reviewMode() {
+  idx = 0;
+  show('quizView');
+  render();
+}
+
+function updateBadge() {
+  document.getElementById('scoreBadge').textContent = 'Score: ' + score + ' / ' + answered;
+}
+</script>
+</body>
+</html>
